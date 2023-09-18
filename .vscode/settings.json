@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "tic_tac_toe.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "stdbool.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}
