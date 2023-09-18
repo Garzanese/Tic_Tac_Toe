@@ -23,6 +23,7 @@ int main()
 
 	struct Move BestMove;
 
+	// Initialize a new seed every run to have be random
 	srand(time(NULL));
 
     resetPlayGround(PlayGround);
@@ -44,8 +45,8 @@ int main()
 			currentSymbol=Peppino;
 			if ( ((int) turn/2)==0)
 			{
-				SelRow = 2*rand()/RAND_MAX;
-				SelCol = 2*rand()/RAND_MAX;
+				SelRow = rand()% NROW;
+				SelCol = rand()% NCOL;
 			}
 			else
 			{
