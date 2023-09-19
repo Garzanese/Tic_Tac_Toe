@@ -13,6 +13,7 @@ int main()
 
 	char Symbol1 = 'X';
 	char Symbol2 = 'O';
+	int OrderFlag= 0;
 
     char PlayGround[NROW][NCOL];
 	int SelRow;
@@ -24,17 +25,20 @@ int main()
 	struct Move BestMove;
 
 	// Initialize a new seed every run to have be random
-	srand(time(NULL));
+	srand((unsigned int)(NULL));
 
-    resetPlayGround(PlayGround);
-
-	int OrderFlag = selectPlayerOrder();
-	selectSymbol (&Human, &Peppino, Symbol1, Symbol2);
-
-	printPlayGround(PlayGround);
-
+	headerExplanation();
+	resetPlayGround(PlayGround);
+	
 	while (isOk)
 	{
+		if (isAllEmpty(PlayGround))
+		{
+			turn = 0;
+			OrderFlag = selectPlayerOrder();
+			selectSymbol (&Human, &Peppino, Symbol1, Symbol2);
+			printPlayGround(PlayGround);
+		}
 		if (turn % 2 == OrderFlag)
 		{
 			currentSymbol=Human;
@@ -43,14 +47,14 @@ int main()
 		else
 		{
 			currentSymbol=Peppino;
-			if ( ((int) turn/2)==0)
+			if (isAllEmpty(PlayGround))
 			{
 				SelRow = rand()% NROW;
 				SelCol = rand()% NCOL;
 			}
 			else
 			{
-				BestMove=findBestMove(PlayGround, currentSymbol, Human);
+				findBestMove(PlayGround, currentSymbol, Human, &BestMove);
 				SelRow=BestMove.row;
 				SelCol=BestMove.col;
 			}
@@ -60,26 +64,51 @@ int main()
 		writePlayGround (PlayGround, SelRow, SelCol, currentSymbol);
 		printPlayGround (PlayGround);
 
+		turn++;
+
 		if(!isMovesLeft(PlayGround) || isGameEnd(PlayGround))
 		{
-			isOk=0;
-
 			if(isGameEnd(PlayGround))
 			{
+				resetPlayGround(PlayGround);
 				printf("Player [ %c ] win the game", currentSymbol);
-				return 0;
+				printf("\n");
+				printf("%c",SPACE);
+				printf("\n");
 			}			
 
 			if(!isMovesLeft(PlayGround))
 			{
-				printf(" the game is a draw. Retry");
-				return 0;
+				resetPlayGround(PlayGround);
+				printf("The game is a draw. Retry");
+				printf("\n");
+				printf("%c",SPACE);
+				printf("\n");
 			}
+			isOk=askRetry();
 		}
-
-		turn++;
 	}
 	return 0;
+}
+
+void headerExplanation(void)
+{
+	printf("Hello this is tic-tac-toe from Garzanese.");
+	printf("\n");
+	printf("\n");
+	printf("Tic-tac-toe is a paper-and-pencil game for two players who take turns marking the spaces in a 3x3 grid with X or O.");
+	printf("\n");
+	printf("The player who succeeds in placing three of their marks in a horizontal, vertical, or diagonal row is the winner.");
+	printf("\n");
+	printf("It is a solved game, with a forced draw assuming best play from both players.");
+	printf("\n");
+	printf("%c",SPACE);
+	printf("\n");
+	printf("Now it is time to play.") ;
+	printf("\n");
+	printf("%c",SPACE);
+	printf("\n");
+
 }
 
 void resetPlayGround (char PlayGround[NROW][NCOL])
@@ -161,14 +190,9 @@ void requestInput 	(int *SelRow, int *SelCol, char PlayGround[NROW][NCOL])
 
 	while (isOk)
 	{
-		
-		printf("Please write the chosen row:");
-		scanf( "%d", SelRow); 
-
-		printf("\n");
-		printf("Please write the chosen column:");
-
+		printf("Please write the chosen row & column [e.g. 0a]:");
 		fflush(stdin);
+		scanf( "%d", SelRow); 
 		scanf( "%c",&dummy);
 
 		*SelCol=dummy-LOWCASE_SHIFT;
@@ -200,8 +224,8 @@ void selectSymbol (char *SelSymbol, char *OpponentSymbol, char Symbol1, char Sym
 	while (isOK)
 	{
 		printf("Select which symbol do you want to use [ %c ] or [ %c ]:",dummy[0],dummy[1]);
-		scanf( "%c", SelSymbol);
 		fflush(stdin);
+		scanf( "%c", SelSymbol);
 
 		if (*SelSymbol==dummy[0] || *SelSymbol==dummy[1])
 		{
@@ -237,15 +261,15 @@ int selectPlayerOrder(void)
 	while (isOK)
 	{
 		char dummy;
-		printf("Hello this is tic-tac-toe from Garzanese. Do you want to go first?");
+		printf("Do you want to go first?");
 		printf("\n");
 		printf("y - Yes, I want to start");
 		printf("\n");
 		printf("n - No, I prefer to go second");
 		printf("\n");
 
-		scanf( "%c", &dummy);
 		fflush(stdin);
+		scanf( "%c", &dummy);
 
 		if (dummy=='y' || dummy=='n')
 		{
@@ -276,6 +300,19 @@ bool isMovesLeft(char PlayGround[NROW][NCOL])
 		}
 	}
     return false;
+}
+
+bool isAllEmpty(char PlayGround[NROW][NCOL])
+{
+    for (int i = 0; i<NROW; i++)
+	{
+        for (int j = 0; j<NCOL; j++)
+		{
+            if (PlayGround[i][j]!=SPACE)
+                return false;
+		}
+	}
+    return true;
 }
 
 bool isGameEnd(char PlayGround[NROW][NCOL])
@@ -315,56 +352,8 @@ bool isGameEnd(char PlayGround[NROW][NCOL])
 	return false;	
 }
 
-struct Move findBestMove(char PlayGround[NROW][NCOL], char ActiveSymbol, char UnactiveSymbol)
+int MiniMax (char PlayGround[NROW][NCOL], int Val, bool isMax, int Depth, char ActiveSymbol, char UnactiveSymbol )
 {
-	struct Move bestMove;
-    bestMove.row = -1;
-    bestMove.col = -1;
-
-    int bestVal = -1000;
-	int MaxVal  = 10;
-
-    // Traverse all cells, evaluate minimax function for
-    // all empty cells. And return the cell with optimal
-    // value.
-    for (int irow = 0; irow<NROW; irow++)
-    {
-        for (int icol = 0; icol<NCOL; icol++)
-        {
-            // Check if cell is empty
-            if (PlayGround[irow][icol]==SPACE)
-            {
-                // Make the move
-                PlayGround[irow][icol] = ActiveSymbol;
-  
-                // compute evaluation function for this
-                // move.
-                int moveVal = MiniMax (PlayGround, MaxVal, false, 0, UnactiveSymbol, ActiveSymbol);
-  
-                // Undo the move
-                PlayGround[irow][icol] = SPACE;
-  
-                // If the value of the current move is
-                // more than the best value, then update
-                // best/
-                if (moveVal > bestVal)
-                {
-                    bestMove.row = irow;
-                    bestMove.col = icol;
-                    bestMove.value = moveVal;
-                    bestVal = moveVal;
-                }
-            }
-        }
-    }
-	return bestMove;
-}
-
-double MiniMax (char PlayGround[NROW][NCOL], int Val, bool isMax, int Depth, char ActiveSymbol, char UnactiveSymbol )
-{
-	int irow;
-	int icol;
-	int moveVal;
 
 	if (isGameEnd(PlayGround))
 	{
@@ -434,4 +423,86 @@ double MiniMax (char PlayGround[NROW][NCOL], int Val, bool isMax, int Depth, cha
         }
         return best;
 	}
+}
+
+void findBestMove(char PlayGround[NROW][NCOL], char ActiveSymbol, char UnactiveSymbol, struct Move *bestMove)
+{
+    bestMove->row = -1;
+    bestMove->col = -1;
+
+    int bestVal = -1000;
+	int MaxVal  = 10;
+
+    // Traverse all cells, evaluate minimax function for
+    // all empty cells. And return the cell with optimal
+    // value.
+    for (int irow = 0; irow<NROW; irow++)
+    {
+        for (int icol = 0; icol<NCOL; icol++)
+        {
+            // Check if cell is empty
+            if (PlayGround[irow][icol]==SPACE)
+            {
+                // Make the move
+                PlayGround[irow][icol] = ActiveSymbol;
+  
+                // compute evaluation function for this
+                // move.
+                int moveVal = MiniMax (PlayGround, MaxVal, false, 0, UnactiveSymbol, ActiveSymbol);
+  
+                // Undo the move
+                PlayGround[irow][icol] = SPACE;
+  
+                // If the value of the current move is
+                // more than the best value, then update
+                // best/
+                if (moveVal > bestVal)
+                {
+                    bestMove->row = irow;
+                    bestMove->col = icol;
+                    bestMove->value = moveVal;
+                    bestVal = moveVal;
+                }
+            }
+        }
+    }
+}
+
+int askRetry(void)
+{
+	int isOK 	= 1;
+	int out 	= 1;
+
+	while (isOK)
+	{
+		char dummy;
+		printf("Do you want to play another game?");
+		printf("\n");
+		printf("y - Yes, I want to start again");
+		printf("\n");
+		printf("n - No, I prefer to go work");
+		printf("\n");
+		printf("%c",SPACE);
+		printf("\n");
+		
+		fflush(stdin);
+		scanf( "%c", &dummy);
+		
+
+		if (dummy=='y' || dummy=='n')
+		{
+			isOK=0;
+
+			if(dummy=='n')
+			{
+				out = 0;
+			}
+		}
+		else
+		{
+			printf("The chosen symbol was not corret.");
+			printf("\n");
+		}
+	}
+	return out;
 }

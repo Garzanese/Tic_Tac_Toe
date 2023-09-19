@@ -19,6 +19,7 @@ struct Move
     int value;
 };
 
+void headerExplanation(void);
 void printPlayGround (char [NROW][NCOL]);
 void resetPlayGround (char [NROW][NCOL]);
 void requestInput (int *, int *, char [NROW][NCOL]);
@@ -27,5 +28,7 @@ void writePlayGround (char [NROW][NCOL], int, int , char);
 int selectPlayerOrder(void);
 bool isMovesLeft(char [NROW][NCOL]);
 bool isGameEnd(char [NROW][NCOL]);
-double MiniMax (char [NROW][NCOL], int, bool, int, char, char);
-struct Move findBestMove(char [NROW][NROW], char, char);
+bool isAllEmpty(char [NROW][NCOL]);
+int askRetry(void);
+void findBestMove(char [NROW][NROW], char, char, struct Move *);
+int MiniMax (char [NROW][NCOL], int, bool, int, char, char);
