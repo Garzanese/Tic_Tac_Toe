@@ -30,5 +30,5 @@ bool isMovesLeft(char [NROW][NCOL]);
 bool isGameEnd(char [NROW][NCOL]);
 bool isAllEmpty(char [NROW][NCOL]);
 int askRetry(void);
-void findBestMove(char [NROW][NROW], char, char, struct Move *);
 int MiniMax (char [NROW][NCOL], int, bool, int, char, char);
+void findBestMove(char [NROW][NCOL], char , char , struct Move *);
