@@ -320,36 +320,83 @@ bool isGameEnd(char PlayGround[NROW][NCOL])
 	int irow;
 	int icol;
 
+	bool winRow = true;
+	bool winCol = true;
+	bool winDiag = true;
+	bool winDiag2= true;
+	
 	// Check all the rows
 	for (irow=0; irow<NROW; irow++)
 	{
-		if(PlayGround[irow][1]==PlayGround[irow][0] && PlayGround[irow][2]==PlayGround[irow][0]  && PlayGround[irow][0]!=SPACE)
+		if  (PlayGround[irow][0]!=SPACE)		
 		{
-			return true;
+			for (icol=0; icol<NCOL;icol++)
+			{
+				if(PlayGround[irow][icol]!=PlayGround[irow][0])
+				{
+					winRow=false;
+				}
+			}
+		}
+		else
+		{
+			winRow=false;
 		}
 	}
+	
 
 	// check all the columns
 	for (icol=0; icol<NCOL; icol++)
 	{
-		if(PlayGround[1][icol]==PlayGround[0][icol] && PlayGround[2][icol]==PlayGround[0][icol] && PlayGround[0][icol]!=SPACE)
+		if  (PlayGround[0][icol]!=SPACE)		
 		{
-			return true;
+			for (irow=0; irow<NROW; irow++)
+			{
+				if(PlayGround[irow][icol]!=PlayGround[0][icol])
+				{
+					winCol=false;
+				}
+			}
+		}
+		else
+		{
+			winCol=false;
 		}
 	}
 
-	// check first diagonal
-	if(PlayGround[1][1]==PlayGround[0][0] &&  PlayGround[2][2]==PlayGround[0][0] && PlayGround[0][0]!=SPACE)
+	// check major diagonal
+	for (icol=0; icol<NCOL; icol++)
 	{
-		return true;
-	}	
-
-	// check second diagonal
-	if(PlayGround[1][1]==PlayGround[0][2] && PlayGround[2][0]==PlayGround[0][2] && PlayGround[0][2]!=SPACE)
-	{
-		return true;
+		if  (PlayGround[0][0]!=SPACE)		
+		{
+			if(PlayGround[icol][icol]!=PlayGround[0][0])
+			{
+				winDiag=false;
+			}
+		}
+		else
+		{
+			winDiag=false;
+		}
 	}
-	return false;	
+
+	// check minor diagonal
+	for (icol=0; icol<NCOL; icol++)
+	{
+		if  (PlayGround[NROW-1][0]!=SPACE)		
+		{
+			if(PlayGround[NROW-1][0]!=PlayGround[NROW-1-icol][icol])
+			{
+				winDiag2=false;
+			}
+		}
+		else
+		{
+			winDiag2=false;
+		}
+	}
+
+	return winDiag2 || winDiag || winRow || winCol;
 }
 
 int MiniMax (char PlayGround[NROW][NCOL], int Val, bool isMax, int Depth, char ActiveSymbol, char UnactiveSymbol )

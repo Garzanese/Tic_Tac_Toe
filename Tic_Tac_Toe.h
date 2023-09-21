@@ -1,6 +1,6 @@
 
 #define NCOL 3
-#define NROW 3
+#define NROW NCOL
 #define SPACE 32
 #define LOWCASE_SHIFT 97
 
