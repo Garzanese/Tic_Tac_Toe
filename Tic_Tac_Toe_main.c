@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <time.h>
+#include <ctype.h>
 
 #include "Tic_Tac_Toe.h"
 
@@ -88,6 +88,10 @@ int main()
 			isOk=askRetry();
 		}
 	}
+	printf("Press Any Key to Continue\n");
+	fflush(stdin);
+	OrderFlag=getchar(); 
+	
 	return 0;
 }
 
@@ -185,18 +189,18 @@ void printPlayGround (char PlayGround[NROW][NCOL])
 void requestInput 	(int *SelRow, int *SelCol, char PlayGround[NROW][NCOL])
 {
 	char EmptyVal = SPACE;
-	char dummy;
 	int isOk=1;
+	char dummy_col;
+	char dummy_row;
 
 	while (isOk)
 	{
 		printf("Please write the chosen row & column [e.g. 0a]:");
 		fflush(stdin);
-		scanf( "%d", SelRow); 
-		scanf( "%c",&dummy);
-
-		*SelCol=dummy-LOWCASE_SHIFT;
-
+		scanf( "%c %c", &dummy_row, &dummy_col); 
+	
+		*SelCol=tolower(dummy_col)-LOWCASE_SHIFT;
+		*SelRow=tolower(dummy_row)-NUM_SHIFT;
 		if(*SelRow<NROW && *SelCol<NCOL)
 		{
 			if (PlayGround[*SelRow][*SelCol]==EmptyVal)
@@ -227,11 +231,11 @@ void selectSymbol (char *SelSymbol, char *OpponentSymbol, char Symbol1, char Sym
 		fflush(stdin);
 		scanf( "%c", SelSymbol);
 
-		if (*SelSymbol==dummy[0] || *SelSymbol==dummy[1])
+		if (tolower(*SelSymbol)==tolower(dummy[0]) || (tolower(*SelSymbol)==tolower(dummy[1])))
 		{
 			isOK=0;
 
-			if (*SelSymbol==dummy[0])
+			if (tolower(*SelSymbol)==tolower(dummy[0]))
 			{
 				*OpponentSymbol=dummy[1];
 			}
@@ -271,7 +275,7 @@ int selectPlayerOrder(void)
 		fflush(stdin);
 		scanf( "%c", &dummy);
 
-		if (dummy=='y' || dummy=='n')
+		if (tolower(dummy)=='y' || tolower(dummy)=='n')
 		{
 			isOK=0;
 
@@ -319,81 +323,51 @@ bool isGameEnd(char PlayGround[NROW][NCOL])
 {
 	int irow;
 	int icol;
+	int i;
 
-	bool winRow = true;
-	bool winCol = true;
+	bool winRow;
+	bool winCol;
 	bool winDiag = true;
-	bool winDiag2= true;
+	bool winDiag2 = true;
 	
-	// Check all the rows
-	for (irow=0; irow<NROW; irow++)
+	// check all the raws
+	for (irow=0; irow<NCOL; irow++)
 	{
-		if  (PlayGround[irow][0]!=SPACE)		
+		winRow = true;
+		for (icol=1; icol<NROW; icol++)
 		{
-			for (icol=0; icol<NCOL;icol++)
-			{
-				if(PlayGround[irow][icol]!=PlayGround[irow][0])
-				{
-					winRow=false;
-				}
-			}
+			winRow = winRow && (PlayGround[irow][icol]==PlayGround[irow][0]) && (PlayGround[irow][0]!=SPACE);
 		}
-		else
+		if (winRow)
 		{
-			winRow=false;
+			break;
 		}
 	}
 	
-
 	// check all the columns
 	for (icol=0; icol<NCOL; icol++)
 	{
-		if  (PlayGround[0][icol]!=SPACE)		
+		winCol = true;
+		for (irow=1; irow<NROW; irow++)
 		{
-			for (irow=0; irow<NROW; irow++)
-			{
-				if(PlayGround[irow][icol]!=PlayGround[0][icol])
-				{
-					winCol=false;
-				}
-			}
+			winCol= winCol && (PlayGround[irow][icol]==PlayGround[0][icol]) && (PlayGround[0][icol]!=SPACE);
 		}
-		else
+		if (winCol)
 		{
-			winCol=false;
+			break;
 		}
 	}
 
 	// check major diagonal
-	for (icol=0; icol<NCOL; icol++)
+	for (i=0; i<NCOL; i++)
 	{
-		if  (PlayGround[0][0]!=SPACE)		
-		{
-			if(PlayGround[icol][icol]!=PlayGround[0][0])
-			{
-				winDiag=false;
-			}
-		}
-		else
-		{
-			winDiag=false;
-		}
+		winDiag= winDiag && (PlayGround[i][i]==PlayGround[0][0]) && (PlayGround[0][0]!=SPACE);
 	}
 
 	// check minor diagonal
-	for (icol=0; icol<NCOL; icol++)
+	for (i=0; i<NCOL; i++)
 	{
-		if  (PlayGround[NROW-1][0]!=SPACE)		
-		{
-			if(PlayGround[NROW-1][0]!=PlayGround[NROW-1-icol][icol])
-			{
-				winDiag2=false;
-			}
-		}
-		else
-		{
-			winDiag2=false;
-		}
+		winDiag2= winDiag2 && (PlayGround[NROW-1-i][i]==PlayGround[NROW-1][0]) && (PlayGround[NROW-1][0]!=SPACE);	
 	}
 
 	return winDiag2 || winDiag || winRow || winCol;
@@ -542,6 +516,7 @@ int askRetry(void)
 
 			if(dummy=='n')
 			{
+
 				out = 0;
 			}
 		}

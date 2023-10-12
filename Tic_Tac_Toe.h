@@ -3,6 +3,7 @@
 #define NROW NCOL
 #define SPACE 32
 #define LOWCASE_SHIFT 97
+#define NUM_SHIFT 48
 
 #ifndef max
     #define max(a,b) ((a) > (b) ? (a) : (b))
